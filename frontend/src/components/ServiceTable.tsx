@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Service } from '../types';
-import { generateTests } from '../api';
+import { generateTests, markComplete } from '../api';
 
 interface ServiceTableProps {
   services: Service[];
@@ -18,6 +18,23 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({ services, onServiceU
     } catch (error) {
       console.error('Error generating tests:', error);
       alert('Failed to generate tests. Please try again.');
+    } finally {
+      setLoadingIds(prev => {
+        const next = new Set(prev);
+        next.delete(service.id);
+        return next;
+      });
+    }
+  };
+
+  const handleMarkComplete = async (service: Service) => {
+    setLoadingIds(prev => new Set(prev).add(service.id));
+    try {
+      const updatedService = await markComplete(service.id);
+      onServiceUpdate(updatedService);
+    } catch (error) {
+      console.error('Error marking complete:', error);
+      alert('Failed to mark service as complete. Please try again.');
     } finally {
       setLoadingIds(prev => {
         const next = new Set(prev);
@@ -106,7 +123,22 @@ export const ServiceTable: React.FC<ServiceTableProps> = ({ services, onServiceU
                   <div className="last-updated">{formatDate(service.last_updated)}</div>
                 </td>
                 <td>
-                  {needsImprovement ? (
+                  {service.status === 'in-progress' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                      <span className="cooking-status">
+                        <span>🔥</span>
+                        <span>Devin is cooking...</span>
+                      </span>
+                      <button
+                        className="complete-btn"
+                        onClick={() => handleMarkComplete(service)}
+                        disabled={isLoading}
+                        title="Mark as complete after reviewing Devin's PR"
+                      >
+                        {isLoading ? '⏳' : '✓ Mark Complete'}
+                      </button>
+                    </div>
+                  ) : needsImprovement ? (
                     <button
                       className="action-btn"
                       onClick={() => handleGenerateTests(service)}

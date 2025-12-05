@@ -20,3 +20,13 @@ export async function generateTests(serviceId: number): Promise<Service> {
   return response.json();
 }
 
+export async function markComplete(serviceId: number): Promise<Service> {
+  const response = await fetch(`${API_BASE_URL}/api/services/${serviceId}/mark_complete`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to mark service as complete');
+  }
+  return response.json();
+}
+

@@ -45,9 +45,7 @@ async def call_devin_for_service(service: Service) -> Optional[Dict[str, Any]]:
   
   prompt = (
       f"You are Devin helping the Bank of America DevEx team improve test coverage.\n\n"
-      f"═══════════════════════════════════════════════════════════════\n"
       f"REPOSITORY & SERVICE INFORMATION\n"
-      f"═══════════════════════════════════════════════════════════════\n"
       f"Repository: {GITHUB_REPO_URL}\n"
       f"Branch: {GITHUB_BRANCH}\n"
       f"New Branch to Create: {branch_name}\n"
@@ -61,9 +59,7 @@ async def call_devin_for_service(service: Service) -> Optional[Dict[str, Any]]:
       f"Target coverage: {service.goal}%\n"
       f"Status: {service.status}\n"
       f"Risk level: {service.deprecation_risk}\n\n"
-      f"═══════════════════════════════════════════════════════════════\n"
       f"WORKFLOW - STEP BY STEP\n"
-      f"═══════════════════════════════════════════════════════════════\n"
       f"1. Clone the repository: {GITHUB_REPO_URL}\n"
       f"2. Checkout base branch: git checkout {GITHUB_BRANCH}\n"
       f"3. Create new branch: git checkout -b {branch_name}\n"
@@ -77,9 +73,7 @@ async def call_devin_for_service(service: Service) -> Optional[Dict[str, Any]]:
       f"11. Commit with detailed message (format below)\n"
       f"12. Push branch: git push origin {branch_name}\n"
       f"13. Create PR to {GITHUB_BRANCH} with title: 'test: {service.name} coverage {service.coverage}% → {service.goal}%'\n\n"
-      f"═══════════════════════════════════════════════════════════════\n"
       f"TEST GENERATION REQUIREMENTS\n"
-      f"═══════════════════════════════════════════════════════════════\n"
       f"Focus areas:\n"
       f"1. Critical business logic paths (all public methods)\n"
       f"2. Edge cases and boundary conditions (min/max values, null, empty)\n"
@@ -94,9 +88,7 @@ async def call_devin_for_service(service: Service) -> Optional[Dict[str, Any]]:
       f"- Include JavaDoc comments explaining what each test validates\n"
       f"- Mock external dependencies if needed\n"
       f"- Aim for {service.goal}% line coverage minimum\n\n"
-      f"═══════════════════════════════════════════════════════════════\n"
       f"COMMIT MESSAGE FORMAT (REQUIRED)\n"
-      f"═══════════════════════════════════════════════════════════════\n"
       f"Title: test: Increase {service.name} coverage from {service.coverage}% to {service.goal}%\n\n"
       f"Body must include:\n\n"
       f"Test Cases Added:\n"
@@ -154,8 +146,8 @@ async def get_all_services() -> list[Service]:
 @app.post("/api/services/{service_id}/generate_tests")
 async def generate_tests(service_id: int) -> Service:
     """
-    Simulate calling Devin to generate tests.
-    Updates coverage to goal, sets status to healthy, and updates last_updated.
+    Trigger Devin to generate tests.
+    Sets status to in-progress while Devin works asynchronously.
     """
     # Find the service
     service = next((s for s in services_db if s.id == service_id), None)
@@ -163,10 +155,28 @@ async def generate_tests(service_id: int) -> Service:
     if not service:
         raise HTTPException(status_code=404, detail="Service not found")
     
-    # Optionally call Devin API; simulation still applies coverage updates below
-    await call_devin_for_service(service)
+    # Call Devin API to start async test generation
+    devin_response = await call_devin_for_service(service)
+    
+    # Set to in-progress while Devin works (user can manually mark as healthy after PR is merged)
+    service.status = "in-progress"
+    service.last_updated = datetime.now().isoformat()
+    
+    return service
 
-    # Simulate Devin generating tests by updating coverage locally
+
+@app.post("/api/services/{service_id}/mark_complete")
+async def mark_complete(service_id: int) -> Service:
+    """
+    Mark a service as complete after reviewing and merging Devin's PR.
+    Updates coverage to goal and sets status to healthy.
+    """
+    service = next((s for s in services_db if s.id == service_id), None)
+    
+    if not service:
+        raise HTTPException(status_code=404, detail="Service not found")
+    
+    # Mark as complete - coverage achieved
     service.coverage = service.goal
     service.status = "healthy"
     service.last_updated = datetime.now().isoformat()

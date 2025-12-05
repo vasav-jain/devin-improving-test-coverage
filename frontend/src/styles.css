@@ -419,6 +419,48 @@ body {
   font-weight: 600;
 }
 
+.cooking-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--info);
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.complete-btn {
+  border: 1px solid var(--success);
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 180ms ease;
+}
+
+.complete-btn:hover:not(:disabled) {
+  background: var(--success);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.complete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
 .table-placeholder {
   color: var(--muted);
   font-size: 0.9rem;
