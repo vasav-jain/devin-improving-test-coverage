@@ -62,7 +62,7 @@ def get_services() -> list[Service]:
             coverage=68,
             goal=75,
             last_updated="2024-01-18T11:20:00",
-            status="ip",
+            status="at-risk",
             deprecation_risk="low"
         ),
         Service(
@@ -106,7 +106,7 @@ def get_services() -> list[Service]:
             coverage=58,
             goal=75,
             last_updated="2024-01-19T12:00:00",
-            status="ip",
+            status="at-risk",
             deprecation_risk="medium"
         ),
         Service(

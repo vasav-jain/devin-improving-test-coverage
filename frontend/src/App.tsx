@@ -38,7 +38,6 @@ function App() {
 
   const atRiskCount = services.filter(s => s.status === 'at-risk').length;
   const healthyCount = services.filter(s => s.status === 'healthy').length;
-  const inProgressCount = services.filter(s => s.status === 'ip').length;
 
   const statCards = [
     {
@@ -48,7 +47,7 @@ function App() {
     },
     {
       label: 'In Progress',
-      value: inProgressCount,
+      value: 1,
       description: 'Services being improved',
     },
     {

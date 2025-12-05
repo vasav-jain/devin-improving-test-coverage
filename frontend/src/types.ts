@@ -1,4 +1,4 @@
-export type ServiceStatus = "healthy" | "at-risk" | "ip";
+export type ServiceStatus = "healthy" | "at-risk";
 export type DeprecationRisk = "low" | "medium" | "high";
 
 export interface Service {
